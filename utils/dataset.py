@@ -7,6 +7,7 @@ from utils.dsp import *
 from utils import hparams as hp
 from utils.text import text_to_sequence
 from utils.paths import Paths
+from utils.display import repr1
 from pathlib import Path
 
 
@@ -24,8 +25,8 @@ class VocoderDataset(Dataset):
 
     def __getitem__(self, index):
         item_id = self.metadata[index]
-        m = np.load(self.mel_path/f'{item_id}.npy')
-        x = np.load(self.quant_path/f'{item_id}.npy')
+        m = np.load(self.mel_path/'%s.npy' % (repr1(item_id)))
+        x = np.load(self.quant_path/'%s.npy' % (repr1(item_id)))
         return m, x
 
     def __len__(self):
@@ -147,7 +148,7 @@ class TTSDataset(Dataset):
     def __getitem__(self, index):
         item_id = self.metadata[index]
         x = text_to_sequence(self.text_dict[item_id], hp.tts_cleaner_names)
-        mel = np.load(self.path/'mel'/f'{item_id}.npy')
+        mel = np.load(self.path/'mel'/'%s.npy' % (repr1(item_id)))
         mel_len = mel.shape[-1]
         return x, mel, item_id, mel_len
 

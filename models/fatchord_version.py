@@ -267,7 +267,7 @@ class WaveRNN(nn.Module):
     def gen_display(self, i, seq_len, b_size, start):
         gen_rate = (i + 1) / (time.time() - start) * b_size / 1000
         pbar = progbar(i, seq_len)
-        msg = f'| {pbar} {i*b_size}/{seq_len*b_size} | Batch Size: {b_size} | Gen Rate: {gen_rate:.1f}kHz | '
+        msg = '| %s %s/%s | Batch Size: %s | Gen Rate: %.1fkHz | ' % (repr1(pbar), repr1(i*b_size), repr1(seq_len*b_size), repr1(b_size), gen_rate)
         stream(msg)
 
     def get_gru_cell(self, gru):
@@ -423,7 +423,7 @@ class WaveRNN(nn.Module):
 
     def num_params(self, print_out=True):
         parameters = filter(lambda p: p.requires_grad, self.parameters())
-        parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
+        parameters = sum([np.prod(p.size()) for p in parameters]) / 1000000
         if print_out:
             print('Trainable Parameters: %.3fM' % parameters)
         return parameters

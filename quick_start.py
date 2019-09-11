@@ -5,7 +5,7 @@ from utils.text.symbols import symbols
 from models.tacotron import Tacotron
 import argparse
 from utils.text import text_to_sequence
-from utils.display import save_attention, simple_table
+from utils.display import save_attention, simple_table, repr1
 import zipfile, os
 
 
@@ -103,20 +103,20 @@ if __name__ == "__main__":
     r = tts_model.r
 
     simple_table([('WaveRNN', str(voc_k) + 'k'),
-                  (f'Tacotron(r={r})', str(tts_k) + 'k'),
+                  ('Tacotron(r=%s)' % (repr1(r)), str(tts_k) + 'k'),
                   ('Generation Mode', 'Batched' if batched else 'Unbatched'),
                   ('Target Samples', target if batched else 'N/A'),
                   ('Overlap Samples', overlap if batched else 'N/A')])
 
     for i, x in enumerate(inputs, 1):
 
-        print(f'\n| Generating {i}/{len(inputs)}')
+        print('\n| Generating %s/%s' % (repr1(i), repr1(len(inputs))))
         _, m, attention = tts_model.generate(x)
 
         if input_text:
-            save_path = f'quick_start/__input_{input_text[:10]}_{tts_k}k.wav'
+            save_path = 'quick_start/__input_%s_%sk.wav' % (repr1(input_text[:10]), repr1(tts_k))
         else:
-            save_path = f'quick_start/{i}_batched{str(batched)}_{tts_k}k.wav'
+            save_path = 'quick_start/%s_batched%s_%sk.wav' % (repr1(i), repr1(str(batched)), repr1(tts_k))
 
         # save_attention(attention, save_path)
 

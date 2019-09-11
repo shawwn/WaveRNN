@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch import optim
 import torch.nn.functional as F
-from utils.display import stream, simple_table
+from utils.display import stream, simple_table, repr1
 from utils.dataset import get_vocoder_datasets
 from utils.distribution import discretized_mix_logistic_loss
 from utils import hparams as hp
@@ -72,7 +72,7 @@ def main():
 
     train_set, test_set = get_vocoder_datasets(paths.data, batch_size, train_gta)
 
-    total_steps = 10_000_000 if force_train else hp.voc_total_steps
+    total_steps = 10000000 if force_train else hp.voc_total_steps
 
     simple_table([('Remaining', str((total_steps - voc_model.get_step())//1000) + 'k Steps'),
                   ('Batch Size', batch_size),
@@ -141,11 +141,11 @@ def voc_train_loop(paths: Paths, model: WaveRNN, loss_func, optimizer, train_set
             if step % hp.voc_checkpoint_every == 0:
                 gen_testset(model, test_set, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
                             hp.voc_target, hp.voc_overlap, paths.voc_output)
-                ckpt_name = f'wave_step{k}K'
+                ckpt_name = 'wave_step%sK' % (repr1(k))
                 save_checkpoint('voc', paths, model, optimizer,
                                 name=ckpt_name, is_silent=True)
 
-            msg = f'| Epoch: {e}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:.4f} | {speed:.1f} steps/s | Step: {k}k | '
+            msg = '| Epoch: %s/%s (%s/%s) | Loss: %.4f | %.1f steps/s | Step: %sk | ' % (repr1(e), repr1(epochs), repr1(i), repr1(total_iters), avg_loss, speed, repr1(k))
             stream(msg)
 
         # Must save latest optimizer state to ensure that resuming training

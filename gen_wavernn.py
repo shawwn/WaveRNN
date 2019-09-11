@@ -2,7 +2,7 @@ from utils.dataset import get_vocoder_datasets
 from utils.dsp import *
 from models.fatchord_version import WaveRNN
 from utils.paths import Paths
-from utils.display import simple_table
+from utils.display import simple_table, repr1
 import torch
 import argparse
 from pathlib import Path
@@ -27,10 +27,10 @@ def gen_testset(model: WaveRNN, test_set, samples, batched, target, overlap, sav
         else:
             x = label_2_float(x, bits)
 
-        save_wav(x, save_path/f'{k}k_steps_{i}_target.wav')
+        save_wav(x, save_path/'%sk_steps_%s_target.wav' % (repr1(k), repr1(i)))
 
-        batch_str = f'gen_batched_target{target}_overlap{overlap}' if batched else 'gen_NOT_BATCHED'
-        save_str = str(save_path/f'{k}k_steps_{i}_{batch_str}.wav')
+        batch_str = 'gen_batched_target%s_overlap%s' % (repr1(target), repr1(overlap)) if batched else 'gen_NOT_BATCHED'
+        save_str = str(save_path/'%sk_steps_%s_%s.wav' % (repr1(k), repr1(i), repr1(batch_str)))
 
         _ = model.generate(m, save_str, batched, target, overlap, hp.mu_law)
 
@@ -43,24 +43,24 @@ def gen_from_file(model: WaveRNN, load_path: Path, save_path: Path, batched, tar
     suffix = load_path.suffix
     if suffix == ".wav":
         wav = load_wav(load_path)
-        save_wav(wav, save_path/f'__{file_name}__{k}k_steps_target.wav')
+        save_wav(wav, save_path/'__%s__%sk_steps_target.wav' % (repr1(file_name), repr1(k)))
         mel = melspectrogram(wav)
     elif suffix == ".npy":
         mel = np.load(load_path)
         if mel.ndim != 2 or mel.shape[0] != hp.num_mels:
-            raise ValueError(f'Expected a numpy array shaped (n_mels, n_hops), but got {wav.shape}!')
+            raise ValueError('Expected a numpy array shaped (n_mels, n_hops), but got %s!' % (repr1(wav.shape)))
         _max = np.max(mel)
         _min = np.min(mel)
         if _max >= 1.01 or _min <= -0.01:
-            raise ValueError(f'Expected spectrogram range in [0,1] but was instead [{_min}, {_max}]')
+            raise ValueError('Expected spectrogram range in [0,1] but was instead [%s, %s]' % (repr1(_min), repr1(_max)))
     else:
-        raise ValueError(f"Expected an extension of .wav or .npy, but got {suffix}!")
+        raise ValueError('Expected an extension of .wav or .npy, but got %s!' % (repr1(suffix)))
 
 
     mel = torch.tensor(mel).unsqueeze(0)
 
-    batch_str = f'gen_batched_target{target}_overlap{overlap}' if batched else 'gen_NOT_BATCHED'
-    save_str = save_path/f'__{file_name}__{k}k_steps_{batch_str}.wav'
+    batch_str = 'gen_batched_target%s_overlap%s' % (repr1(target), repr1(overlap)) if batched else 'gen_NOT_BATCHED'
+    save_str = save_path/'__%s__%sk_steps_%s.wav' % (repr1(file_name), repr1(k), repr1(batch_str))
 
     _ = model.generate(mel, save_str, batched, target, overlap, hp.mu_law)
 

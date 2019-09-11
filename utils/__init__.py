@@ -64,12 +64,12 @@ class __HParams:
         if not isinstance(path, Path):
             path = Path(path).expanduser()
         if not path.exists():
-            raise FileNotFoundError(f"Could not find hparams file {path}")
+            raise FileNotFoundError('Could not find hparams file %s' % (repr(path)))
         elif path.suffix != ".py":
             raise ValueError("`path` must be a python file")
 
         ###### Load in attributes from module ######
-        m = _import_from_file("hparams", path)
+        m = _import_from_file("hparams", str(path))
 
         reg = re.compile(r"^__.+__$")  # Matches magic methods
         for name, value in m.__dict__.items():
@@ -79,8 +79,7 @@ class __HParams:
             if name in self.__dict__:
                 # Cannot overwrite already existing attributes
                 raise AttributeError(
-                    f"module at `path` cannot contain attribute {name} as it "
-                    "overwrites an attribute of the same name in utils.hparams")
+                    'module at `path` cannot contain attribute %s as it overwrites an attribute of the same name in utils.hparams' % (repr(name)))
             # Fair game to copy over the attribute
             self.__setattr__(name, value)
 

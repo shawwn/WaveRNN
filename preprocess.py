@@ -50,15 +50,15 @@ def convert_file(path: Path):
 def process_wav(path: Path):
     wav_id = path.stem
     m, x = convert_file(path)
-    np.save(paths.mel/f'{wav_id}.npy', m, allow_pickle=False)
-    np.save(paths.quant/f'{wav_id}.npy', x, allow_pickle=False)
+    np.save(paths.mel/'%s.npy' % (repr1(wav_id)), m, allow_pickle=False)
+    np.save(paths.quant/'%s.npy' % (repr1(wav_id)), x, allow_pickle=False)
     return wav_id, m.shape[-1]
 
 
 wav_files = get_files(path, extension)
 paths = Paths(hp.data_path, hp.voc_model_id, hp.tts_model_id)
 
-print(f'\n{len(wav_files)} {extension[1:]} files found in "{path}"\n')
+print('\n%s %s files found in "%s"\n' % (repr1(len(wav_files)), repr1(extension[1:]), repr1(path)))
 
 if len(wav_files) == 0:
 
@@ -81,7 +81,7 @@ else:
         ('Bit Depth', hp.bits),
         ('Mu Law', hp.mu_law),
         ('Hop Length', hp.hop_length),
-        ('CPU Usage', f'{n_workers}/{cpu_count()}')
+        ('CPU Usage', '%s/%s' % (repr1(n_workers), repr1(cpu_count())))
     ])
 
     pool = Pool(processes=n_workers)
@@ -90,7 +90,7 @@ else:
     for i, (item_id, length) in enumerate(pool.imap_unordered(process_wav, wav_files), 1):
         dataset += [(item_id, length)]
         bar = progbar(i, len(wav_files))
-        message = f'{bar} {i}/{len(wav_files)} '
+        message = '%s %s/%s ' % (repr1(bar), repr1(i), repr1(len(wav_files)))
         stream(message)
 
     with open(paths.data/'dataset.pkl', 'wb') as f:

@@ -6,7 +6,7 @@ from utils.paths import Paths
 from models.tacotron import Tacotron
 import argparse
 from utils.text import text_to_sequence
-from utils.display import save_attention, simple_table
+from utils.display import save_attention, simple_table, repr1
 from utils.dsp import reconstruct_waveform, save_wav
 import numpy as np
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     for i, x in enumerate(inputs, 1):
 
-        print(f'\n| Generating {i}/{len(inputs)}')
+        print('\n| Generating %s/{len(inputs)}' % (repr1(i)))
         _, m, attention = tts_model.generate(x)
         # Fix mel spectrogram scaling to be from 0 to 1
         m = (m + 4) / 8
@@ -152,9 +152,9 @@ if __name__ == "__main__":
             v_type = 'wavernn_unbatched'
 
         if input_text:
-            save_path = paths.tts_output/f'__input_{input_text[:10]}_{v_type}_{tts_k}k.wav'
+            save_path = paths.tts_output/'__input_%s_%s_%sk.wav' % (repr1(input_text[:10]), repr1(v_type), repr1(tts_k))
         else:
-            save_path = paths.tts_output/f'{i}_{v_type}_{tts_k}k.wav'
+            save_path = paths.tts_output/'%s_%s_%sk.wav' % (repr1(i), repr1(v_type), repr1(tts_k))
 
         if save_attn: save_attention(attention, save_path)
 

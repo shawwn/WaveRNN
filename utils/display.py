@@ -13,9 +13,11 @@ def progbar(i, n, size=16):
         bar += '█' if i <= done else '░'
     return bar
 
+def repr1(x):
+    return x if type(x) is str else repr(x)
 
 def stream(message):
-    sys.stdout.write(f"\r{message}")
+    sys.stdout.write('\r%s' % (repr1(message)))
 
 
 def simple_table(item_tuples):
@@ -49,8 +51,8 @@ def simple_table(item_tuples):
 
     for i in range(len(item_tuples)):
 
-        temp_head = f'| {headings[i]} '
-        temp_body = f'| {cells[i]} '
+        temp_head = '| %s ' % (repr1(headings[i]))
+        temp_body = '| %s ' % (repr1(cells[i]))
 
         border += border_pattern[:len(temp_head)]
         head += temp_head
@@ -76,15 +78,15 @@ def time_since(started):
     if m >= 60:
         h = int(m // 60)
         m = m % 60
-        return f'{h}h {m}m {s}s'
+        return '%sh %sm %ss' % (repr1(h), repr1(m), repr1(s))
     else:
-        return f'{m}m {s}s'
+        return '%sm %ss' % (repr1(m), repr1(s))
 
 
 def save_attention(attn, path):
     fig = plt.figure(figsize=(12, 6))
     plt.imshow(attn.T, interpolation='nearest', aspect='auto')
-    fig.savefig(path.parent/f'{path.stem}.png', bbox_inches='tight')
+    fig.savefig(path.parent/'%s.png' % (repr1(path.stem)), bbox_inches='tight')
     plt.close(fig)
 
 
@@ -93,7 +95,7 @@ def save_spectrogram(M, path, length=None):
     if length: M = M[:, :length]
     fig = plt.figure(figsize=(12, 6))
     plt.imshow(M, interpolation='nearest', aspect='auto')
-    fig.savefig(f'{path}.png', bbox_inches='tight')
+    fig.savefig('%s.png' % (repr1(path)), bbox_inches='tight')
     plt.close(fig)
 
 

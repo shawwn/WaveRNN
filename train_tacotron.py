@@ -15,7 +15,7 @@ import time
 import numpy as np
 import sys
 from utils.checkpoints import save_checkpoint, restore_checkpoint
-
+from utils.display import repr1
 
 def np_now(x: torch.Tensor): return x.detach().cpu().numpy()
 
@@ -89,7 +89,7 @@ def main():
 
             model.r = r
 
-            simple_table([(f'Steps with r={r}', str(training_steps//1000) + 'k Steps'),
+            simple_table([('Steps with r=%s' % (repr1(r)), str(training_steps//1000) + 'k Steps'),
                             ('Batch Size', batch_size),
                             ('Learning Rate', lr),
                             ('Outputs/Step (r)', model.r)])
@@ -156,16 +156,16 @@ def tts_train_loop(paths: Paths, model: Tacotron, optimizer, train_set, lr, trai
             k = step // 1000
 
             if step % hp.tts_checkpoint_every == 0:
-                ckpt_name = f'taco_step{k}K'
+                ckpt_name = 'taco_step%sK' % (repr1(k))
                 save_checkpoint('tts', paths, model, optimizer,
                                 name=ckpt_name, is_silent=True)
 
             if attn_example in ids:
                 idx = ids.index(attn_example)
-                save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/f'{step}')
-                save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/f'{step}', 600)
+                save_attention(np_now(attention[idx][:, :160]), paths.tts_attention/'%s' % (repr1(step)))
+                save_spectrogram(np_now(m2_hat[idx]), paths.tts_mel_plot/'%s' % (repr1(step)), 600)
 
-            msg = f'| Epoch: {e}/{epochs} ({i}/{total_iters}) | Loss: {avg_loss:#.4} | {speed:#.2} steps/s | Step: {k}k | '
+            msg = '| Epoch: %s/%s (%s/%s) | Loss: %.4f | %.2f steps/s | Step: %sk | ' % (repr1(e), repr1(epochs), repr1(i), repr1(total_iters), avg_loss, speed, repr1(k))
             stream(msg)
 
         # Must save latest optimizer state to ensure that resuming training
@@ -191,10 +191,10 @@ def create_gta_features(model: Tacotron, train_set, save_path: Path):
         for j, item_id in enumerate(ids):
             mel = gta[j][:, :mel_lens[j]]
             mel = (mel + 4) / 8
-            np.save(save_path/f'{item_id}.npy', mel, allow_pickle=False)
+            np.save(save_path/'%s.npy' % (repr1(item_id)), mel, allow_pickle=False)
 
         bar = progbar(i, iters)
-        msg = f'{bar} {i}/{iters} Batches '
+        msg = '%s %s/%s Batches ' % (repr1(bar), repr1(i), repr1(iters))
         stream(msg)
 
 

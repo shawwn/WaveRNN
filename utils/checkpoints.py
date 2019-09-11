@@ -1,5 +1,6 @@
 import torch
 from utils.paths import Paths
+from utils.display import repr1
 from models.tacotron import Tacotron
 
 
@@ -47,19 +48,18 @@ def save_checkpoint(checkpoint_type: str, paths: Paths, model, optimizer, *,
         if num_exist not in (0,2):
             # Checkpoint broken
             raise FileNotFoundError(
-                f'We expected either both or no files in the {s} checkpoint to '
-                'exist, but instead we got exactly one!')
+                'We expected either both or no files in the %s checkpoint to exist, but instead we got exactly one!' % (repr1(s)))
 
         if num_exist == 0:
-            if not is_silent: print(f'Creating {s} checkpoint...')
+            if not is_silent: print('Creating %s checkpoint...' % (repr1(s)))
             for p in path_dict.values():
                 p.parent.mkdir(parents=True, exist_ok=True)
         else:
-            if not is_silent: print(f'Saving to existing {s} checkpoint...')
+            if not is_silent: print('Saving to existing %s checkpoint...' % (repr1(s)))
 
-        if not is_silent: print(f'Saving {s} weights: {path_dict["w"]}')
+        if not is_silent: print('Saving %s weights: %s' % (repr1(s), repr1(path_dict["w"])))
         model.save(path_dict['w'])
-        if not is_silent: print(f'Saving {s} optimizer state: {path_dict["o"]}')
+        if not is_silent: print('Saving %s optimizer state: %s' % (repr1(s), repr1(path_dict["o"])))
         torch.save(optimizer.state_dict(), path_dict['o'])
 
     weights_path, optim_path, checkpoint_path = \
@@ -70,8 +70,8 @@ def save_checkpoint(checkpoint_type: str, paths: Paths, model, optimizer, *,
 
     if name:
         named_paths = {
-            'w': checkpoint_path/f'{name}_weights.pyt',
-            'o': checkpoint_path/f'{name}_optim.pyt',
+            'w': checkpoint_path/'%s_weights.pyt' % (repr1(name)),
+            'o': checkpoint_path/'%s_optim.pyt' % (repr1(name)),
         }
         helper(named_paths, True)
 
@@ -103,8 +103,8 @@ def restore_checkpoint(checkpoint_type: str, paths: Paths, model, optimizer, *,
 
     if name:
         path_dict = {
-            'w': checkpoint_path/f'{name}_weights.pyt',
-            'o': checkpoint_path/f'{name}_optim.pyt',
+            'w': checkpoint_path/'%s_weights.pyt' % (repr1(name)),
+            'o': checkpoint_path/'%s_optim.pyt' % (repr1(name)),
         }
         s = 'named'
     else:
@@ -117,12 +117,12 @@ def restore_checkpoint(checkpoint_type: str, paths: Paths, model, optimizer, *,
     num_exist = sum(p.exists() for p in path_dict.values())
     if num_exist == 2:
         # Checkpoint exists
-        print(f'Restoring from {s} checkpoint...')
-        print(f'Loading {s} weights: {path_dict["w"]}')
+        print('Restoring from %s checkpoint...' % (repr1(s)))
+        print('Loading %s weights: %s' % (repr1(s), repr1(path_dict["w"])))
         model.load(path_dict['w'])
-        print(f'Loading {s} optimizer state: {path_dict["o"]}')
+        print('Loading %s optimizer state: {path_dict["o"]}' % (repr1(s)))
         optimizer.load_state_dict(torch.load(path_dict['o']))
     elif create_if_missing:
         save_checkpoint(checkpoint_type, paths, model, optimizer, name=name, is_silent=False)
     else:
-        raise FileNotFoundError(f'The {s} checkpoint could not be found!')
+        raise FileNotFoundError('The %s checkpoint could not be found!' % (repr1(s)))

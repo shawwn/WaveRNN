@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-
 def log_sum_exp(x):
     """ numerically stable log_sum_exp implementation that prevents overflow """
     # TF ordering
